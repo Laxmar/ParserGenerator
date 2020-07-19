@@ -2,15 +2,14 @@ from enum import Enum
 
 from src import struct_dto
 from src.abstract_parser_generator import AbstractParserGenerator
+from src.endian import Endian
 from src.variable_dto import VariableType, VariableDto
 
 
 class DartVariableType(Enum):
-
     int = "int"
     double = "double"
     bool = "bool"
-
 
     @staticmethod
     def convert(variable: VariableDto):
@@ -32,17 +31,17 @@ class DartVariableType(Enum):
 
 
 class DartParserGenerator(AbstractParserGenerator):
-
     # TODO pass params for formating and endian implement in AbstractParserGenerator
-    def __init__(self):
+    def __init__(self, endian: Endian):
+        super().__init__(endian)
         self.body = ""
         # move to abstract
-        #self.endian
-        #self.formater
-        #self.endline
+        # self.endian
+        # self.formater
+        # self.endline
 
     def generate_class(self, struct_dto: struct_dto):
-        self.create_file_header(struct_dto.name)
+        self.body = "class " + struct_dto.name + " {" + "\n"
 
         for variable in struct_dto.variables:
             dart_type = DartVariableType.convert(variable)
@@ -59,6 +58,3 @@ class DartParserGenerator(AbstractParserGenerator):
 
     def generate_parse_function(self, struct_dto):
         pass
-
-    def create_file_header(self, struct_name):
-        self.body = "class " + struct_name + " {" + "\n"

@@ -1,9 +1,11 @@
 from src import struct_dto
 from src.abstract_parser_generator import AbstractParserGenerator
+from src.endian import Endian
 
 
 class PythonParserGenerator(AbstractParserGenerator):
-    def __init__(self):
+    def __init__(self, endian: Endian):
+        super().__init__(endian)
         self.body = ""
 
     # TODO pass params for formating
