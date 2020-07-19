@@ -6,8 +6,8 @@ from src.variable import Variable
 class Struct:
 
     def __init__(self):
-        self.name = ""
-        self.variables = []
+        self.name: str = ""
+        self.variables: [Variable] = []
 
     def __str__(self):
         return self.name + "\n" + " ".join([str(var) for var in self.variables])

@@ -138,3 +138,5 @@ dmypy.json
 cython_debug/
 tests/files/secret/
 
+
+.idea/misc.xml

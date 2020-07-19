@@ -20,27 +20,24 @@ class VariableType(Enum):
 
 class Variable:
     def __init__(self, type_str: str, name: str):
-        self.type = self.map_variable_type(type_str)
+        self.original_type = type_str
+        self.__map_variable_type(type_str)
         self.name = name
-        # size in bits or byte
-        # self.size = get_size()
 
     def __str__(self):
         return "VariableDto name=" + self.name + " type=" + str(self.type.name)
 
-    @staticmethod
-    def map_variable_type(variable_type):
+    def __map_variable_type(self, variable_type):
         # TODO add support for short, int, etc.
         switcher = {
-            "uint8_t": VariableType.uint8,
-            "int8_t": VariableType.int8,
-            "uint16_t": VariableType.uint16,
-            "int16_t": VariableType.int16,
-            "uint32_t": VariableType.uint32,
-            "int32_t": VariableType.int32,
-            "float": VariableType.float,
-            "double": VariableType.double,
-            "bool": VariableType.bool
+            "uint8_t": (VariableType.uint8, 1),
+            "int8_t": (VariableType.int8, 1),
+            "uint16_t": (VariableType.uint16, 2),
+            "int16_t": (VariableType.int16, 2),
+            "uint32_t": (VariableType.uint32, 4),
+            "int32_t": (VariableType.int32, 4),
+            "float": (VariableType.float, 4),
+            "double": (VariableType.double, 4),
+            "bool": (VariableType.bool, 1)
         }
-        # TODO should return custom or type?
-        return switcher.get(variable_type, VariableType.custom)
+        self.type, self.size = switcher.get(variable_type, (VariableType.custom, None))
