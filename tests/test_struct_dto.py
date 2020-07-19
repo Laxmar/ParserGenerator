@@ -1,7 +1,7 @@
 import unittest
 
 from src.struct_dto import StructDto
-from src.variable_dto import VariableDto
+from src.variable_dto import VariableDto, VariableType
 
 
 class TestStructDto(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestStructDto(unittest.TestCase):
 
         variable: VariableDto = struct_dto.variables[0]
         self.assertEqual(variable.name, "param")
-        self.assertEqual(variable.type, "uint8_t")
+        self.assertEqual(variable.type, VariableType.uint8)
 
     def test_extract_line_with_extra_newline(self):
         struct_dto = StructDto()
@@ -25,7 +25,7 @@ class TestStructDto(unittest.TestCase):
 
         variable: VariableDto = struct_dto.variables[0]
         self.assertEqual(variable.name, "param")
-        self.assertEqual(variable.type, "uint8_t")
+        self.assertEqual(variable.type, VariableType.uint8)
 
     def test_extract_line_with_spaces(self):
         struct_dto = StructDto()
@@ -34,7 +34,7 @@ class TestStructDto(unittest.TestCase):
 
         variable: VariableDto = struct_dto.variables[0]
         self.assertEqual(variable.name, "param")
-        self.assertEqual(variable.type, "uint8_t")
+        self.assertEqual(variable.type, VariableType.uint8)
 
 
 if __name__ == '__main__':
