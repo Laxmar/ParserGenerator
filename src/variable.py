@@ -18,7 +18,7 @@ class VariableType(Enum):
     custom = "custom"
 
 
-class VariableDto:
+class Variable:
     def __init__(self, type_str: str, name: str):
         self.type = self.map_variable_type(type_str)
         self.name = name

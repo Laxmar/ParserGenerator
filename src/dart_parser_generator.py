@@ -1,9 +1,9 @@
 from enum import Enum
 
-from src import struct_dto
 from src.abstract_parser_generator import AbstractParserGenerator
 from src.endian import Endian
-from src.variable_dto import VariableType, VariableDto
+from src.struct import Struct
+from src.variable import VariableType, Variable
 
 
 class DartVariableType(Enum):
@@ -12,7 +12,7 @@ class DartVariableType(Enum):
     bool = "bool"
 
     @staticmethod
-    def convert(variable: VariableDto):
+    def convert(variable: Variable):
         # TODO format variable type if custom? or format after extraction?
         switcher = {
             VariableType.uint8: DartVariableType.int,
@@ -31,26 +31,24 @@ class DartVariableType(Enum):
 
 
 class DartParserGenerator(AbstractParserGenerator):
-    # TODO pass params for formating and endian implement in AbstractParserGenerator
+    # TODO pass params for formating implement in AbstractParserGenerator
     def __init__(self, endian: Endian):
         super().__init__(endian)
         self.body = ""
-        # move to abstract
-        # self.endian
         # self.formater
-        # self.endline
 
-    def generate_class(self, struct_dto: struct_dto):
-        self.body = "class " + struct_dto.name + " {" + "\n"
+    def generate_class(self, struct_dto: Struct):
+        self.body = "class " + struct_dto.name + " {" + self.end_of_line
 
         for variable in struct_dto.variables:
             dart_type = DartVariableType.convert(variable)
-            self.body += "\t" + dart_type.name + " " + variable.name + ";\n"
+            self.body += "\t" + dart_type.name + " " + variable.name + self.end_of_line
+        self.body += self.end_of_line
 
-        self.body += "\n\t" + struct_dto.name + "({" + "\n"
+        self.body += "\t" + struct_dto.name + "({" + self.end_of_line
         for variable in struct_dto.variables:
-            self.body += "\t\t this." + variable.name + ",\n"
-        self.body += "\t});" + "\n"
+            self.body += "\t\t this." + variable.name + "," + self.end_of_line
+        self.body += "\t});" + self.end_of_line
 
         self.body += "}"
 

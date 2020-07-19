@@ -1,7 +1,6 @@
 import re
 
-from src.struct_dto import StructDto
-
+from src.struct import Struct
 
 
 # TODO handle nested struct
@@ -9,13 +8,13 @@ from src.struct_dto import StructDto
 def extract_struct_from_file(file_path):
     is_struct_started = False
     struct_dtos = []
-    struct_dto = StructDto()
+    struct_dto = Struct()
 
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
 
             if line.find("struct") != -1:
-                struct_dto = StructDto()
+                struct_dto = Struct()
                 is_struct_started = True
                 struct_dto.name = line.split(" ")[1]
                 continue

@@ -1,4 +1,4 @@
-from src import struct_dto
+from src import struct
 from src.abstract_parser_generator import AbstractParserGenerator
 from src.endian import Endian
 
@@ -8,8 +8,7 @@ class PythonParserGenerator(AbstractParserGenerator):
         super().__init__(endian)
         self.body = ""
 
-    # TODO pass params for formating
-    def generate_class(self, struct_dto: struct_dto):
+    def generate_class(self, struct_dto: struct):
         self.create_file_header(struct_dto.name)
 
         self.body += "\tdef __init__(self):" + "\n"

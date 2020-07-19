@@ -1,9 +1,9 @@
 import re
 
-from src.variable_dto import VariableDto
+from src.variable import Variable
 
 
-class StructDto:
+class Struct:
 
     def __init__(self):
         self.name = ""
@@ -19,5 +19,5 @@ class StructDto:
         if len(tokens) > 2:
             raise Exception()
 
-        variable_dto = VariableDto(tokens[0], tokens[1])
+        variable_dto = Variable(tokens[0], tokens[1])
         self.variables.append(variable_dto)
