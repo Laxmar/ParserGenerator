@@ -37,7 +37,9 @@ class DartParserGenerator(AbstractParserGenerator):
         self.body = ""
         self.input_variable_name = "buffer"
         self.offset_variable_name = "offset"
+        self.init_offset_variable_name = "initOffset"
         self.class_variable_name = "result"
+        self.variable_size_variable_name = "variable_size"
 
     def generate_class(self, struct_dto: Struct):
         # TODO add imports
@@ -60,26 +62,25 @@ class DartParserGenerator(AbstractParserGenerator):
 
     def generate_parse_function(self, struct_dto):
         self.body += self.end_of_line
-        # TODO remove magic variables names using self and refactor
-        self.body += "int Parse" + struct_dto.name + "(ByteData buffer, int initOffset, " + struct_dto.name + " " + self.class_variable_name + ") {" + self.end_of_line
+        self.body += "int Parse" + struct_dto.name + "(ByteData " + self.input_variable_name + ", int " + self.init_offset_variable_name + ", " + struct_dto.name + " " + self.class_variable_name + ") {" + self.end_of_line
 
-        self.body += "\t" + "int offset = initOffset;" + self.end_of_line
-        self.body += "\t" + "int variableSize = 0;" + self.end_of_line
+        self.body += "\t" + "int " + self.offset_variable_name + " = " + self.init_offset_variable_name + ";" + self.end_of_line
+        self.body += "\t" + "int " + self.variable_size_variable_name + " = 0;" + self.end_of_line
 
         for variable in struct_dto.variables:
             self.body += self.end_of_line
 
             if variable.type is not VariableType.custom:
-                self.body += "\t" + "variableSize = " + str(variable.size) + ";" + self.end_of_line
+                self.body += "\t" + self.variable_size_variable_name + " = " + str(variable.size) + ";" + self.end_of_line
                 self.body += "\t" + self.class_variable_name + "." + variable.name + " = " + self.__get_parse_function(variable.type) + ";" + self.end_of_line
             else:
                 self.body += "\t" + "var " + variable.name + " = new " + variable.original_type + "();" + self.end_of_line
-                self.body += "\t" + "variableSize = " + "Parse" + variable.original_type + "(buffer, offset, " + variable.name + ");" + self.end_of_line
+                self.body += "\t" + self.variable_size_variable_name + " = " + "Parse" + variable.original_type + "(" + self.input_variable_name + ", " + self.offset_variable_name + ", " + variable.name + ");" + self.end_of_line
 
-            self.body += "\t" + "offset += variableSize;" + self.end_of_line
+            self.body += "\t" + self.offset_variable_name + " += " + self.variable_size_variable_name + ";" + self.end_of_line
 
         self.body += self.end_of_line
-        self.body += "\t" + "return offset;" + self.end_of_line
+        self.body += "\t" + "return " + self.offset_variable_name + ";" + self.end_of_line
         self.body += "}" + self.end_of_line
 
         # TODO remove print
