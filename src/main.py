@@ -18,18 +18,20 @@ if __name__ == '__main__':
 
     # TODO convert inputs
     # file_path = "../tests/files/SimplestStuct.h"
-    file_path = "../tests/files/TwoStructs.h"
+    file_path = "../tests/files/secret/BatteryData.h"
     language = Language.get_from_name(language_input)
     endian = Endian.get_from_name(endian_input)
     #name_format
 
     structs = extract_struct_from_file(file_path)
-    for struct in structs:
-        print(struct)
 
     parser_generator: abstract_parser_generator = ParserGeneratorFactory.create(language, endian)
 
-    parser_generator.generate_class(structs[0])
+    for struct in structs:
+        #print(struct)
+        parser_generator.generate_class(struct)
+        parser_generator.generate_parse_function(struct)
+
     # parser_file = parserGenerator.generate(structs)
     # extension = get_file_extension(language)
     # file_name = create_file_name(sth, extension)

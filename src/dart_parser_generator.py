@@ -15,19 +15,19 @@ class DartVariableType(Enum):
     @staticmethod
     def convert(variable: Variable):
         switcher = {
-            VariableType.uint8: DartVariableType.int,
-            VariableType.uint16: DartVariableType.int,
-            VariableType.uint32: DartVariableType.int,
+            VariableType.uint8: DartVariableType.int.name,
+            VariableType.uint16: DartVariableType.int.name,
+            VariableType.uint32: DartVariableType.int.name,
 
-            VariableType.int8: DartVariableType.int,
-            VariableType.int16: DartVariableType.int,
-            VariableType.int32: DartVariableType.int,
+            VariableType.int8: DartVariableType.int.name,
+            VariableType.int16: DartVariableType.int.name,
+            VariableType.int32: DartVariableType.int.name,
 
-            VariableType.float: DartVariableType.double,
-            VariableType.double: DartVariableType.double,
-            VariableType.bool: DartVariableType.bool
+            VariableType.float: DartVariableType.double.name,
+            VariableType.double: DartVariableType.double.name,
+            VariableType.bool: DartVariableType.bool.name
         }
-        return switcher.get(variable.type, variable.type)
+        return switcher.get(variable.type, variable.original_type)
 
 
 class DartParserGenerator(AbstractParserGenerator):
@@ -40,11 +40,15 @@ class DartParserGenerator(AbstractParserGenerator):
         self.class_variable_name = "result"
 
     def generate_class(self, struct_dto: Struct):
+        # TODO add imports
+        # import 'dart:typed_data';
+        # bool intToBool(int a) => a == 0 ? false : true;
+
         self.body = "class " + struct_dto.name + " {" + self.end_of_line
 
         for variable in struct_dto.variables:
             dart_type = DartVariableType.convert(variable)
-            self.body += "\t" + dart_type.name + " " + variable.name + ";" + self.end_of_line
+            self.body += "\t" + dart_type + " " + variable.name + ";" + self.end_of_line
         self.body += self.end_of_line
 
         self.body += "\t" + struct_dto.name + "({" + self.end_of_line
@@ -52,32 +56,30 @@ class DartParserGenerator(AbstractParserGenerator):
             self.body += "\t\t this." + variable.name + "," + self.end_of_line
         self.body += "\t});" + self.end_of_line
 
-        # TODO add empty constructor
-
         self.body += "}"
 
-        # TODO remove print
-        print(self.body)
-
     def generate_parse_function(self, struct_dto):
+        self.body += self.end_of_line
         # TODO remove magic variables names using self and refactor
-        self.body += "int Parse" + struct_dto.name + "(ByteData buffer, int initOffset) {" + self.end_of_line
+        self.body += "int Parse" + struct_dto.name + "(ByteData buffer, int initOffset, " + struct_dto.name + " " + self.class_variable_name + ") {" + self.end_of_line
 
-        self.body += "\t" + "var " + self.class_variable_name + " = new " + struct_dto.name + "();" + self.end_of_line
         self.body += "\t" + "int offset = initOffset;" + self.end_of_line
-        self.body += "\t" + "int variableSize = 0" + self.end_of_line
+        self.body += "\t" + "int variableSize = 0;" + self.end_of_line
 
         for variable in struct_dto.variables:
+            self.body += self.end_of_line
 
             if variable.type is not VariableType.custom:
                 self.body += "\t" + "variableSize = " + str(variable.size) + ";" + self.end_of_line
                 self.body += "\t" + self.class_variable_name + "." + variable.name + " = " + self.__get_parse_function(variable.type) + ";" + self.end_of_line
             else:
-                self.body += "\t" + "var " + variable.original_type + " = new " + variable.original_type + "();" + self.end_of_line
-                self.body += "\t" + "variableSize = " + "Parse" + variable.original_type + "(buffer, offset);" + self.end_of_line
+                self.body += "\t" + "var " + variable.name + " = new " + variable.original_type + "();" + self.end_of_line
+                self.body += "\t" + "variableSize = " + "Parse" + variable.original_type + "(buffer, offset, " + variable.name + ");" + self.end_of_line
 
             self.body += "\t" + "offset += variableSize;" + self.end_of_line
 
+        self.body += self.end_of_line
+        self.body += "\t" + "return offset;" + self.end_of_line
         self.body += "}" + self.end_of_line
 
         # TODO remove print
@@ -95,15 +97,21 @@ class DartParserGenerator(AbstractParserGenerator):
 
             VariableType.float: "getFloat32",
             VariableType.double: "getFloat64",
-            VariableType.bool:  "getUint8"  # TODO add cast? Test this
+            VariableType.bool:  "getUint8"
         }
         function_name = switcher.get(variable_type)
 
         endian_param = ""
         if variable_type is not VariableType.uint8 and variable_type is not VariableType.int8 and variable_type is not VariableType.bool:
             if self.endian == Endian.LITTLE:
-                endian_param = ", Endian.small"
+                endian_param = ", Endian.little"
             else:
                 endian_param = ", Endian.big"
 
-        return self.input_variable_name + "." + function_name + "(" + self.offset_variable_name + endian_param + ")"
+        function_str = self.input_variable_name + "." + function_name + "(" + self.offset_variable_name + endian_param + ")"
+
+        # TODO refactor
+        if variable_type == VariableType.bool:
+            return "intToBool(" + function_str + ")"
+        else:
+            return function_str
